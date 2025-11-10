@@ -8,10 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBARCHIVE REQUIRED libarchive)
 
-# Find bcrypt (using system crypt library)
+# Find bcrypt
 find_library(CRYPT_LIB crypt)
 
-add_executable(workspace-controller
+add_executable(
+  workspace-controller
   src/main.cc
   src/utils/utils.cc
   src/services/workspaceService.cc
@@ -21,8 +22,14 @@ add_executable(workspace-controller
   src/controllers/workspaceController.cc
 )
 
-target_include_directories(workspace-controller PRIVATE
-  ${CMAKE_SOURCE_DIR}/src
-  ${LIBARCHIVE_INCLUDE_DIRS}
+target_include_directories(workspace-controller
+  PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+    ${LIBARCHIVE_INCLUDE_DIRS}
 )
-target_link_libraries(workspace-controller ${LIBARCHIVE_LIBRARIES} ${CRYPT_LIB} stdc++fs)
+
+target_link_libraries(workspace-controller
+  PRIVATE
+    ${LIBARCHIVE_LIBRARIES}
+    ${CRYPT_LIB}
+)
