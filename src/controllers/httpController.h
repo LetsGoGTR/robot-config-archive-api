@@ -10,6 +10,9 @@ class HttpController {
 
  private:
   void sendResponse(int socket, int status, const std::string& body);
+  void handleGetRequest(int client, const std::string& path);
+  void handlePostRequest(int client, const std::string& path,
+                         const std::string& body);
 };
 
 }  // namespace controllers

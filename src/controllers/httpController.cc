@@ -38,6 +38,48 @@ void HttpController::sendResponse(int socket, int status,
   send(socket, response.c_str(), response.length(), 0);
 }
 
+void HttpController::handleGetRequest(int client, const std::string& path) {
+  if (path == "/api/robot/running") {
+    sendResponse(client, 200, R"({"success":true,"data":false})");
+    return;
+  }
+
+  sendResponse(client, 404, utils::jsonMsg(false, "Not found"));
+}
+
+void HttpController::handlePostRequest(int client, const std::string& path,
+                                       const std::string& body) {
+  std::string user = utils::extractJson(body, "user");
+
+  if (user.empty()) {
+    sendResponse(client, 400, utils::jsonMsg(false, "Missing user"));
+    return;
+  }
+
+  if (user.find("..") != std::string::npos ||
+      user.find("/") != std::string::npos) {
+    sendResponse(client, 400, utils::jsonMsg(false, "Invalid user"));
+    return;
+  }
+
+  if (!fs::exists(Config::PATH_HOME_BASE + user)) {
+    sendResponse(client, 404, utils::jsonMsg(false, "User not found"));
+    return;
+  }
+
+  services::WorkspaceService workspaceService;
+
+  if (path == "/compress") {
+    workspaceService.compress(user);
+    sendResponse(client, 200, utils::jsonMsg(true, "Compressed"));
+  } else if (path == "/extract") {
+    workspaceService.extract(user);
+    sendResponse(client, 200, utils::jsonMsg(true, "Extracted"));
+  } else {
+    sendResponse(client, 404, utils::jsonMsg(false, "Not found"));
+  }
+}
+
 void HttpController::handleRequest(int client) {
   char buf[Config::REQUEST_BUFFER_SIZE] = {0};
   if (read(client, buf, sizeof(buf) - 1) <= 0) return;
@@ -52,46 +94,23 @@ void HttpController::handleRequest(int client) {
 
     std::cout << method << " " << path << '\n';
 
-    if (method != "POST") {
-      sendResponse(client, 404, utils::jsonMsg(false, "Not found"));
+    if (method == "GET") {
+      handleGetRequest(client, path);
       return;
     }
 
-    while (std::getline(stream, line) && line != "\r" && !line.empty()) {
-    }
+    if (method == "POST") {
+      while (std::getline(stream, line) && line != "\r" && !line.empty()) {
+      }
 
-    std::string body;
-    std::getline(stream, body, '\0');
+      std::string body;
+      std::getline(stream, body, '\0');
 
-    std::string user = utils::extractJson(body, "user");
-
-    if (user.empty()) {
-      sendResponse(client, 400, utils::jsonMsg(false, "Missing user"));
+      handlePostRequest(client, path, body);
       return;
     }
 
-    if (user.find("..") != std::string::npos ||
-        user.find("/") != std::string::npos) {
-      sendResponse(client, 400, utils::jsonMsg(false, "Invalid user"));
-      return;
-    }
-
-    if (!fs::exists(Config::PATH_HOME_BASE + user)) {
-      sendResponse(client, 404, utils::jsonMsg(false, "User not found"));
-      return;
-    }
-
-    services::WorkspaceService workspaceService;
-
-    if (path == "/compress") {
-      workspaceService.compress(user);
-      sendResponse(client, 200, utils::jsonMsg(true, "Compressed"));
-    } else if (path == "/extract") {
-      workspaceService.extract(user);
-      sendResponse(client, 200, utils::jsonMsg(true, "Extracted"));
-    } else {
-      sendResponse(client, 404, utils::jsonMsg(false, "Not found"));
-    }
+    sendResponse(client, 404, utils::jsonMsg(false, "Not found"));
   } catch (const std::exception& e) {
     sendResponse(client, 500,
                  R"({"error":")" + std::string(e.what()) + R"("})");
