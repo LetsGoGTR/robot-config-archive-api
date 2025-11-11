@@ -1,0 +1,29 @@
+version: "3.8"
+
+# networks:
+#   my-network:
+#     external: true
+services:
+  api-server:
+    build: .
+    volumes:
+      - default-data:/home/default
+    ports:
+      - "8891:80"
+    depends_on:
+      - ssftp-server
+    # networks:
+    # - my-network
+
+  ssftp-server:
+    image: atmoz/sftp
+    ports:
+      - "8890:22"
+    volumes:
+      - default-data:/home/default
+    command: default:default123:1000:1000:::/home/default
+    # networks:
+    # - my-network
+    
+volumes:
+  default-data:
