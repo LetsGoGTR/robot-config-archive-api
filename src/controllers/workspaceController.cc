@@ -12,9 +12,9 @@ void WorkspaceController::handleCompress(int client, const std::string& body) {
   try {
     std::string user = utils::validateUser(body);
 
-    services::WorkspaceService::compress(user);
+    std::string message = services::WorkspaceService::compress(user);
 
-    utils::sendHttpResponse(client, 200, utils::jsonMsg(true, "Compressed"));
+    utils::sendHttpResponse(client, 200, utils::jsonMsg(true, message));
   } catch (const std::invalid_argument& e) {
     utils::sendHttpResponse(client, 400, utils::jsonMsg(false, e.what()));
   } catch (const std::exception& e) {
