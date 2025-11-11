@@ -10,14 +10,12 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -g 1000 default \
-    && useradd -u 1000 -g default -d /home/default -s /bin/bash default
+    && useradd -u 1000 -g default -d /home/default -s /bin/bash -m default
 
 WORKDIR /app
 
 COPY . .
 
-RUN mkdir -p /home/default/workspace \
-    && chown -R default:default /home/default/workspace
 
 RUN cmake -S . -B build \
     && cmake --build build
