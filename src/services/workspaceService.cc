@@ -62,7 +62,7 @@ static void addDirToArchive(archive* a, const std::string& path,
   }
 }
 
-void WorkspaceService::compress(const std::string& user) {
+std::string WorkspaceService::compress(const std::string& user) {
   std::string base = Config::PATH_HOME_BASE + user;
   std::string workspace = base + Config::PATH_WORKSPACE;
   std::string output = base + Config::PATH_ARCHIVE;
@@ -87,6 +87,13 @@ void WorkspaceService::compress(const std::string& user) {
     addDirToArchive(a, workspace, "workspace");
     archive_write_close(a);
     archive_write_free(a);
+
+    if (chmod(output.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) != 0) {
+      return "Archive created successfully, but failed to set permissions to "
+             "644. File may have restricted access.";
+    }
+
+    return "Compressed";
   } catch (...) {
     archive_write_free(a);
     throw;
@@ -102,6 +109,8 @@ void WorkspaceService::extract(const std::string& user) {
     throw std::runtime_error("Archive file does not exist");
   }
 
+  chmod(input.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+
   fs::remove_all(workspace);
 
   archive* a = archive_read_new();
@@ -114,7 +123,8 @@ void WorkspaceService::extract(const std::string& user) {
     archive_read_support_format_all(a);
     if (archive_read_open_filename(a, input.c_str(),
                                    Config::ARCHIVE_BLOCK_SIZE) != ARCHIVE_OK) {
-      throw std::runtime_error("Failed to open archive");
+      throw std::runtime_error(
+          "Failed to open archive: Check file permissions or file integrity");
     }
 
     archive_entry* entry;
