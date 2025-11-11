@@ -13,8 +13,8 @@ WORKDIR /app
 
 COPY . .
 
-RUN mkdir -p /home/default \
-    && chown -R 1000:1000 /home/default
+RUN mkdir -p /home/default/workspace \
+    && chown -R 1000:1000 /home/default/workspace
 
 RUN cmake -S . -B build \
     && cmake --build build
