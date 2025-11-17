@@ -10,5 +10,6 @@ constexpr size_t FILE_BUFFER_SIZE = 8192;
 constexpr size_t ARCHIVE_BLOCK_SIZE = 10240;
 constexpr const char* PATH_HOME_BASE = "/home/";
 constexpr const char* PATH_WORKSPACE = "/workspace";
-constexpr const char* PATH_ARCHIVE = "/workspace.tgz";
+constexpr const char* PATH_INPUT = "/input.tgz";
+constexpr const char* PATH_OUTPUT = "/output.tgz";
 }  // namespace Config
