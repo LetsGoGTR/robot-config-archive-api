@@ -24,10 +24,10 @@ void HttpController::routeGetRequest(int client, const std::string& path) {
 void HttpController::routePostRequest(int client, const std::string& path,
                                       const std::string& body) {
   // Route to RobotController
-  if (path == "/api/robot/password") {
-    robotController.handleAuth(client, body);
-    return;
-  }
+  // if (path == "/api/robot/password") {
+  //   robotController.handleAuth(client, body);
+  //   return;
+  // }
 
   // Route to WorkspaceController
   if (path == "/api/workspace/compress") {

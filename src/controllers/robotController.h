@@ -10,7 +10,7 @@ class RobotController {
   void handleRunning(int client);
 
   // POST /api/robot/password
-  void handleAuth(int client, const std::string& body);
+  // void handleAuth(int client, const std::string& body);
 };
 
 }  // namespace controllers

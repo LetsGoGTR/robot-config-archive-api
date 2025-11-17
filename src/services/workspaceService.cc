@@ -65,7 +65,7 @@ static void addDirToArchive(archive* a, const std::string& path,
 std::string WorkspaceService::compress(const std::string& user) {
   std::string base = Config::PATH_HOME_BASE + user;
   std::string workspace = base + Config::PATH_WORKSPACE;
-  std::string output = base + Config::PATH_ARCHIVE;
+  std::string output = base + Config::PATH_OUTPUT;
 
   if (!fs::exists(workspace)) {
     throw std::runtime_error("Workspace directory does not exist");
@@ -103,7 +103,7 @@ std::string WorkspaceService::compress(const std::string& user) {
 void WorkspaceService::extract(const std::string& user) {
   std::string base = Config::PATH_HOME_BASE + user;
   std::string workspace = base + Config::PATH_WORKSPACE;
-  std::string input = base + Config::PATH_ARCHIVE;
+  std::string input = base + Config::PATH_INPUT;
 
   if (!fs::exists(input)) {
     throw std::runtime_error("Archive file does not exist");
