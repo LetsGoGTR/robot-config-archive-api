@@ -26,9 +26,9 @@ void WorkspaceController::handleExtract(int client, const std::string& body) {
     std::string user = utils::validateUser(body);
     std::string password = utils::extractJson(body, "password");
 
-    services::WorkspaceService::extract(user);
+    std::string message = services::WorkspaceService::extract(user);
 
-    utils::sendHttpResponse(client, 200, utils::jsonMsg(true, "Extracted"));
+    utils::sendHttpResponse(client, 200, utils::jsonMsg(true, message));
   } catch (const std::invalid_argument& e) {
     utils::sendHttpResponse(client, 400, utils::jsonMsg(false, e.what()));
   } catch (const std::exception& e) {

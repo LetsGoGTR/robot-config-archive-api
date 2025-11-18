@@ -12,4 +12,5 @@ constexpr const char* PATH_HOME_BASE = "/home/";
 constexpr const char* PATH_WORKSPACE = "/workspace";
 constexpr const char* PATH_INPUT = "/input.tgz";
 constexpr const char* PATH_OUTPUT = "/output.tgz";
+constexpr const char* PATH_BACKUP_BASE = "/tmp/workspace_backup";
 }  // namespace Config

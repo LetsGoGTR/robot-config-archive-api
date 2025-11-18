@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
@@ -100,7 +101,7 @@ std::string WorkspaceService::compress(const std::string& user) {
   }
 }
 
-void WorkspaceService::extract(const std::string& user) {
+std::string WorkspaceService::extract(const std::string& user) {
   std::string base = Config::PATH_HOME_BASE + user;
   std::string workspace = base + Config::PATH_WORKSPACE;
   std::string input = base + Config::PATH_INPUT;
@@ -111,10 +112,31 @@ void WorkspaceService::extract(const std::string& user) {
 
   chmod(input.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
-  fs::remove_all(workspace);
+  // Create backup directory path with timestamp
+  auto now = std::chrono::system_clock::now();
+  auto timestamp = std::chrono::duration_cast<std::chrono::seconds>(
+                       now.time_since_epoch())
+                       .count();
+  std::string backup_path =
+      std::string(Config::PATH_BACKUP_BASE) + "_" + user + "_" +
+      std::to_string(timestamp);
+
+  // Backup existing workspace if it exists
+  bool backup_created = false;
+  if (fs::exists(workspace)) {
+    fs::rename(workspace, backup_path);
+    backup_created = true;
+    if (fs::exists(workspace)) {
+      fs::remove_all(workspace);
+    }
+  }
 
   archive* a = archive_read_new();
   if (!a) {
+    // Restore backup if extraction fails before starting
+    if (backup_created) {
+      fs::rename(backup_path, workspace);
+    }
     throw std::runtime_error("Failed to create reader");
   }
 
@@ -148,10 +170,38 @@ void WorkspaceService::extract(const std::string& user) {
     }
     archive_read_close(a);
     archive_read_free(a);
+    a = nullptr;
 
     fs::remove(input);
+
+    // Validate workspace folder exists after extraction
+    if (!fs::exists(workspace) || !fs::is_directory(workspace)) {
+      if (backup_created) {
+        fs::rename(backup_path, workspace);
+        backup_created = false;
+      }
+      throw std::runtime_error("Workspace folder not created");
+    }
+
+    // Remove backup on successful extraction
+    if (backup_created) {
+      fs::remove_all(backup_path);
+    }
+
+    return "Extracted successfully";
   } catch (...) {
-    archive_read_free(a);
+    if (a) {
+      archive_read_free(a);
+    }
+
+    if (backup_created) {
+      if (fs::exists(workspace)) {
+        fs::remove_all(workspace);
+      }
+      fs::rename(backup_path, workspace);
+      throw std::runtime_error("Extraction failed. Restored from backup");
+    }
+
     throw;
   }
 }

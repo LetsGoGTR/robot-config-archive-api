@@ -9,7 +9,7 @@ namespace controllers {
 
 class HttpController {
  public:
-  void handleRequest(int client);
+  void handleRequest(int client, const std::string& client_ip);
 
  private:
   void routeGetRequest(int client, const std::string& path);

@@ -38,7 +38,7 @@ void HttpController::routePostRequest(int client, const std::string& path,
   utils::sendHttpResponse(client, 404, utils::jsonMsg(false, "Not found"));
 }
 
-void HttpController::handleRequest(int client) {
+void HttpController::handleRequest(int client, const std::string& client_ip) {
   char buf[Config::REQUEST_BUFFER_SIZE] = {0};
   if (read(client, buf, sizeof(buf) - 1) <= 0) return;
 
@@ -51,7 +51,7 @@ void HttpController::handleRequest(int client) {
     std::getline(stream, line);
     std::istringstream(line) >> method >> path;
 
-    std::cout << method << " " << path << '\n';
+    std::cout << client_ip << " - " << method << " " << path << '\n';
 
     // Route based on HTTP method
     if (method == "GET") {
