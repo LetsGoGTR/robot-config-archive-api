@@ -30,6 +30,7 @@ add_executable(
 target_include_directories(workspace-controller
   PRIVATE
     ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/libs
     ${LIBARCHIVE_INCLUDE_DIRS}
 )
 

@@ -7,8 +7,7 @@ User=
 WorkingDirectory=
 ExecStart=
 Restart=always
-StandardOutput=file:/var/log/workspace-controller.log
-StandardError=file:/var/log/workspace-controller.err
+LogsDirectory=workspace-controller
 
 [Install]
 WantedBy=multi-user.target
